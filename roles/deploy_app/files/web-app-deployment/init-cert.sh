@@ -2,7 +2,9 @@
 
 domain=$1
 email=$2
+path=$3
 
+cd ${path}
 docker-compose run --rm --entrypoint "\
   openssl req -x509 -nodes -newkey rsa:4096 -days 1\
     -keyout '/etc/letsencrypt/live/${domain}/privkey.pem' \

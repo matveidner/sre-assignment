@@ -43,7 +43,7 @@
               -subj '/CN=localhost'"
 
 - name: Run script to initiate certificates (ansible docker-compose plugin is not suitable for docker-compose run commands)
-  ansible.builtin.command: /home/{{ ansible_user }}/web-app-deployment/init-cert.sh {{ domain }} {{ email }}
+  ansible.builtin.command: /home/{{ ansible_user }}/web-app-deployment/init-cert.sh {{ domain }} {{ email }} /home/{{ ansible_user }}/web-app-deployment
   register: output
   changed_when: output.rc != 0
 
