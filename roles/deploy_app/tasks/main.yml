@@ -1,0 +1,27 @@
+- name: Create remote directory
+  ansible.builtin.file:
+    path: /home/{{ ansible_user }}/web-app-deployment
+    state: directory
+
+- name: Copy Files for deployment
+  ansible.builtin.copy:
+    src: files/
+    dest: /home/{{ ansible_user }}/web-app-deployment/
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Changing permissions for executable script init-cert.sh
+  ansible.builtin.file:
+    dest: /home/{{ ansible_user }}/web-app-deployment/init-cert.sh
+    mode: a+x
+
+#ansible-galaxy collection install community.docker
+
+- name: Build docker-compose if not present
+  community.docker.docker_compose:
+    project_src: /home/{{ ansible_user }}/web-app-deployment
+    build: yes
+  register: output
+
+- ansible.builtin.debug:
+    var: output

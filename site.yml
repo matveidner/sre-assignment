@@ -1,0 +1,5 @@
+- hosts: application-server
+  remote_user: ansible
+  roles:
+  - deploy_app
+  - initiate-certificates

@@ -1,0 +1,6 @@
+[application-server]
+localhost
+
+[application-server:vars]
+domain="placeholdername.com"
+email="admin@emaildomain.com"

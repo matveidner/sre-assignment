@@ -1,0 +1,18 @@
+version: '2'
+
+services:
+  app:
+    build:
+      context: .
+    volumes:
+      - ./configuration/nginx:/etc/nginx/conf.d
+      - ./configuration/certbot/conf:/etc/letsencrypt
+      - ./configuration/certbot/www:/var/www/certbot
+    ports:
+      - "80:80"
+      - "443:443"
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./configuration/certbot/conf:/etc/letsencrypt
+      - ./configuration/certbot/www:/var/www/certbot

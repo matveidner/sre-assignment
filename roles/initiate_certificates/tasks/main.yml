@@ -1,0 +1,57 @@
+- name: Create certbot conf directory
+  ansible.builtin.file:
+    path: /home/{{ ansible_user }}/web-app-deployment/configuration/certbot/conf
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '1777'
+
+- name: Fetch recommended TLS parameters
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/_internal/tls_configs/options-ssl-nginx.conf
+    dest: /home/{{ ansible_user }}/web-app-deployment/configuration/certbot/conf/options-ssl-nginx.conf
+    mode: '0644'
+
+- name: Fetch recommended TLS parameters
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/certbot/certbot/master/certbot/certbot/ssl-dhparams.pem
+    dest: /home/{{ ansible_user }}/web-app-deployment/configuration/certbot/conf/ssl-dhparams.pem
+    mode: '0644'
+
+- name: Create certbot live cert directory
+  ansible.builtin.file:
+    path: /home/{{ ansible_user }}/web-app-deployment/configuration/certbot/conf/live/{{ domain }}
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '1644'
+
+- name: Run with inline v2 compose
+  community.docker.docker_compose:
+    project_name: certbot
+    definition:
+      version: '2'
+      services:
+        certbot:
+          image: certbot/certbot
+          volumes:
+            - ./configuration/certbot/conf:/etc/letsencrypt
+            - ./configuration/certbot/www:/var/www/certbot
+          entrypoint: "openssl req -x509 -nodes -newkey rsa:4096 -days 1\
+              -keyout '/etc/letsencrypt/live/${domain}/privkey.pem' \
+              -out '/etc/letsencrypt/live/${domain}/fullchain.pem' \
+              -subj '/CN=localhost'"
+
+- name: Run script to initiate certificates (ansible docker-compose plugin is not suitable for docker-compose run commands)
+  ansible.builtin.command: /home/{{ ansible_user }}/web-app-deployment/init-cert.sh {{ domain }} {{ email }}
+  register: output
+  changed_when: output.rc != 0
+
+- name: Bi-monthly cert renewal 
+  ansible.builtin.cron:
+    name: "cert renewal"
+    minute: "0"
+    hour: "0"
+    day: "1"
+    month: "*/2"
+    job: "docker-compose run --rm --entrypoint 'certbot certonly --webroot -w /var/www/certbot -d examplerbi.org --rsa-key-size 4096 --agree-tos --force-renewal' certbot && docker-compose exec app nginx -s reload"

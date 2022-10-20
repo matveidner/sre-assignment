@@ -1,0 +1,19 @@
+stages:
+  - web-app
+
+start_deployment_playbook:
+  stage: web-app
+  only:
+    - main
+  image: williamyeh/ansible:ubuntu20.04
+  before_script:
+    - mkdir ansible/secret
+    - echo "$ANSIBLE_SSH_KEY" > ansible/secret/ansible.key
+    - chmod 400 ansible/secret/ansible.key
+    - export ANSIBLE_HOST_KEY_CHECKING=False
+  script:
+    - git checkout $CI_COMMIT_BRANCH
+    - git pull
+    - cd ansible
+    - ansible-playbook -i hosts site.yml -v
+  when: manual
