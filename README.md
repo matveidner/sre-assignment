@@ -11,9 +11,9 @@ Examplary project for automatization of NGINX Reverse Proxy with automatic Letse
 *Gitlab-ci*: For complete automation simple Gitlab-ci manifest as an example. In most cases, more elaborate pipelines would be recommended.
 
 ### Document and present design
-1. On first deployment, reverse proxy is started without any certificates in directories defined in app configuration. For this reason it fails.
-2. Certbot container, which shares volumes with reverse proxy, is used to generate self-signed certificates into shared volume.
-3. Reverse proxy service is restarted. Because the certificate path is now located in its container, it starts accepting requests.
+1. On first deployment, reverse proxy is started without any certificates in directories defined in app configuration. For this reason the container fails.
+2. Certbot container, which shares volumes with reverse proxy, is used to generate self-signed certificates into their shared volume with openssl.
+3. Reverse proxy service is restarted. Because the certificate path is now present in its container, it starts accepting requests.
 4. Mock certificates can be removed and certbot can be triggered to generate proper Let's encrypt validation of defined domain(s).
-5. Reverse proxy server has to be reloaded to register correct certificates.
-6. Cron job is set in bi-monthly intervals for certificate renewal. Let's encrypt certificates last for three months.
+5. Reverse proxy server has to be reloaded to register the correct certificates.
+6. Cron job is set in bi-monthly intervals for certificate renewal. Let's encrypt certificates last for three months, so bi-monthly renewal should suffice. Alternatively, respective containers can be started with entrypoints, that renew certificates/reload nginx on loop. 
