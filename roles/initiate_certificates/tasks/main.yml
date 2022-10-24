@@ -43,7 +43,7 @@
               -subj '/CN=localhost'"
 
 - name: Run script to initiate certificates (ansible docker-compose plugin is not suitable for docker-compose run commands)
-  ansible.builtin.command: /home/{{ ansible_user }}/web-app-deployment/init-cert.sh {{ domain }} {{ email }} /home/{{ ansible_user }}/web-app-deployment
+  ansible.builtin.command: /home/{{ ansible_user }}/web-app-deployment/init-cert.sh -d {{ domain }} -e {{ email }} -p /home/{{ ansible_user }}/web-app-deployment
   register: output
   changed_when: output.rc != 0
 
@@ -54,4 +54,4 @@
     hour: "0"
     day: "1"
     month: "*/2"
-    job: "docker-compose run --rm --entrypoint 'certbot certonly --webroot -w /var/www/certbot -d examplerbi.org --rsa-key-size 4096 --agree-tos --force-renewal' certbot && docker-compose exec app nginx -s reload"
+    job: "docker-compose run --rm --entrypoint 'certbot certonly --webroot -w /var/www/certbot -d {{ domain }} --rsa-key-size 4096 --agree-tos --force-renewal' certbot && docker-compose exec app nginx -s reload"
