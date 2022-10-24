@@ -2,4 +2,4 @@
   remote_user: ansible
   roles:
   - deploy_app
-  - initiate-certificates
+  - initiate_certificates

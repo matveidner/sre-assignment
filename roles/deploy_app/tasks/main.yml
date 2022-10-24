@@ -6,7 +6,7 @@
 - name: Copy Files for deployment
   ansible.builtin.copy:
     src: files/
-    dest: /home/{{ ansible_user }}/web-app-deployment/
+    dest: /home/{{ ansible_user }}
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
 
