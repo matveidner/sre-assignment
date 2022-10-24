@@ -36,4 +36,4 @@ docker-compose run --rm --entrypoint "\
     --force-renewal" certbot
 
 "Reloading the web server."
-docker-compose exec app nginx -s reload
+docker-compose up --force-recreate -d app

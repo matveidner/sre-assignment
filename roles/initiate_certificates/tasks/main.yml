@@ -1,4 +1,5 @@
 - name: Create certbot conf directory
+  become: true
   ansible.builtin.file:
     path: /home/{{ ansible_user }}/web-app-deployment/configuration/certbot/conf
     state: directory
@@ -24,23 +25,7 @@
     state: directory
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    mode: '1644'
-
-- name: Run with inline v2 compose
-  community.docker.docker_compose:
-    project_name: certbot
-    definition:
-      version: '2'
-      services:
-        certbot:
-          image: certbot/certbot
-          volumes:
-            - ./configuration/certbot/conf:/etc/letsencrypt
-            - ./configuration/certbot/www:/var/www/certbot
-          entrypoint: "openssl req -x509 -nodes -newkey rsa:4096 -days 1\
-              -keyout '/etc/letsencrypt/live/${domain}/privkey.pem' \
-              -out '/etc/letsencrypt/live/${domain}/fullchain.pem' \
-              -subj '/CN=localhost'"
+    mode: '1777'
 
 - name: Run script to initiate certificates (ansible docker-compose plugin is not suitable for docker-compose run commands)
   ansible.builtin.command: /home/{{ ansible_user }}/web-app-deployment/init-cert.sh -d {{ domain }} -e {{ email }} -p /home/{{ ansible_user }}/web-app-deployment
@@ -54,4 +39,4 @@
     hour: "0"
     day: "1"
     month: "*/2"
-    job: "docker-compose run --rm --entrypoint 'certbot certonly --webroot -w /var/www/certbot -d {{ domain }} --rsa-key-size 4096 --agree-tos --force-renewal' certbot && docker-compose exec app nginx -s reload"
+    job: "cd /home/{{ ansible_user }}/web-app-deployment && docker-compose run --rm --entrypoint 'certbot certonly --webroot -w /var/www/certbot -d {{ domain }} --rsa-key-size 4096 --agree-tos --force-renewal' certbot && docker-compose up --force-recreate -d app"
